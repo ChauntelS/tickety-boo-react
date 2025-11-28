@@ -3,13 +3,13 @@ import HauntCard from '../ui/HauntCard.jsx'
 
 function Home() {
 
-    // Define a state variable to hold photos
+    // Define a state variable to hold haunts
     const [haunts, setHaunts] = useState([])
 
     // Get API Url from environment variables
     const apiUrl = import.meta.env.VITE_HAUNT_API_URL
 
-    // Fetch photos from API when component mounts
+    // Fetch haunts from API when component mounts
     useEffect(() => { 
         const getHaunts = async () => { 
             const response = await fetch(apiUrl) 

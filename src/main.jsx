@@ -6,15 +6,18 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 // Import route components
 import Home from './routes/Home.jsx'
 import Details from './routes/Details.jsx'
-import Comment from './routes/Comment.jsx'
+import Upcomming from './routes/Upcomming.jsx'
+import NavLayout from './routes/NavBar.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Router>
       <Routes>
+        <Route element={<NavLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/details/:id" element={<Details />} />
-        <Route path="/comment/:id" element={<Comment />} />
+        <Route path="/upcomming/:id" element={<Upcomming />} />
+        </Route>
       </Routes>
     </Router>
   </StrictMode>
