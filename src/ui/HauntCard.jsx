@@ -7,9 +7,9 @@ function HauntCard(props) {
             
                 <img src={props.Filename} alt={props.HauntTitle}  className="card-img-top" 
                 style={{ height: "", objectFit: "cover" }}/>
-                 <div className="card-body d-flex flex-column">
+                 <div className="card-body d-flex flex-column text-center bg-dark text-white">
                 <h5 className="Title">{props.HauntTitle}</h5>
-                <Link to={`/details/${props.HauntId}`}className="btn btn-primary mt-auto">View Details</Link>
+                <Link to={`/details/${props.HauntId}`}className="btn btn-outline-info mt-auto text-light ">Get Haunt Details</Link>
                 </div>
             
             </div>

@@ -41,22 +41,29 @@ function Home() {
     return (
  <>
  <div className="banner mb-4 p-4 rounded-3 bg-dark text-white shadow-sm rounded">
-    <div className= "alert-info py-3 mb-4 shadow-sm "></div>
-        <h4 className="fw-bold mb-2">🔥 Events Happening in the Next 10 Days</h4>
-        <div className="d-flex flex-wrap gap-3">
+    <div className= "alert-info py-3 mb-4 shadow-sm ">
+        <h4 className="fw-bold mb-2 text-center">🔥 Events Happening in the Next 10 Days</h4>
+        </div>
+        <div className="container text-center">
         {haunts.length === 0 && <p>No upcoming events.</p>}
         {haunts.length > 0 && (
-          <ul>
+          <div>
+              <div class="row align-items-start">
             {getEventsWithin10Days(haunts).map(event => (
-              <li key={event.Id}>
-                <strong>{event.Title}</strong> - {new Date(event.Date).toLocaleDateString()}
-              </li>
+              <div key={event.Id}>
+                <div class="col mb-2 d-flex align-items-center justify-content-center gap-3">
+                  <img src={event.ImagePath} alt={event.Title}  width="104" height="136" className=" img-responsive rounded-3 "/>
+                <strong>{event.Title}</strong> {new Date(event.Date).toLocaleDateString()}
+                  
+                </div>
+              </div>
             ))}
-          </ul>
+            </div>
+          </div>
         )}
         </div>
       </div>
-            <h1 className="mb-4">Haunted Locations</h1>
+            <h1 className="mb-4 text-white text-center ">Haunted Events</h1>
             <div className="haunt-grid">
             {
                 haunts.length > 0 && (
