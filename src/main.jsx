@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 // Import route components
 import Home from './routes/Home.jsx'
 import Details from './routes/Details.jsx'
-import Upcomming from './routes/Upcomming.jsx'
+import Purchase from './routes/Purchase.jsx'
 import NavLayout from './routes/NavBar.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route element={<NavLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/details/:id" element={<Details />} />
-        <Route path="/upcomming/:id" element={<Upcomming />} />
+        <Route path="/purchase/:id" element={<Purchase />} />
         </Route>
       </Routes>
     </Router>

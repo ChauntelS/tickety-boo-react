@@ -32,18 +32,33 @@ function Details() {
             <p><Link to="/">← Back to Home</Link></p>
 
             <div className ="haunt-details"> 
-              <div className= "card  text-bg-dark">
+              <div className="d-flex justify-content-center">
+                <div className= "card text-bg-dark">
                 { haunt && (
                     <>
                     
-                        <img src={haunt.ImagePath} alt={haunt.Title} width= "300" />
+                        <img src={haunt.ImagePath} alt={haunt.Title} width= "400"/>
                         <h2>{haunt.Title}</h2>
                         <p>{haunt.Description}</p>
+                        <p><strong>When: </strong>
+                        {new Date(haunt.Date).toLocaleString("en-US", {
+                          weekday: "long",
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "numeric"
+                          })}
+                          </p>
+                        <p><strong>Location:</strong> {haunt.Location}</p>
                     </>
                 )}
+                </div>
               </div>
             </div>
-            <p><Link to={`/details/${id}`}>Suggest a haunted location</Link></p>
+            <div className ="purchase-link">
+              <p><Link to={`/purchase/${id}`}>Purchase Tickets if You Dare!</Link></p>
+              </div>
         </>
     )
 }
