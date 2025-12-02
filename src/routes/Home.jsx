@@ -16,6 +16,7 @@ function Home() {
 
     // Define a state variable to hold haunts
     const [haunts, setHaunts] = useState([])
+  const [upcomingSoon, setUpcomingSoon] = useState([])
 
     // Get API Url from environment variables
     const apiUrl = import.meta.env.VITE_HAUNT_API_URL
@@ -45,20 +46,18 @@ function Home() {
         <h4 className="fw-bold mb-2 text-center">🔥 Events Happening in the Next 10 Days</h4>
         </div>
         <div className="container text-center">
-        {haunts.length === 0 && <p>No upcoming events.</p>}
-        {haunts.length > 0 && (
-          <div>
-              <div class="row align-items-start">
-            {getEventsWithin10Days(haunts).map(event => (
-              <div key={event.Id}>
-                <div class="col mb-2 d-flex align-items-center justify-content-center gap-3">
-                  <img src={event.ImagePath} alt={event.Title}  width="104" height="136" className=" img-responsive rounded-3 "/>
-                <strong>{event.Title}</strong> {new Date(event.Date).toLocaleDateString()}
-                  
+        {upcomingSoon.length === 0 && <p>No upcoming events.</p>}
+        {upcomingSoon.length > 0 && (
+          <div className="row align-items-start justify-content-center">
+            {upcomingSoon.map(event => (
+              <div key={event.Id} className="col-auto mb-2 d-flex align-items-center justify-content-center gap-3">
+                <img src={event.ImagePath} alt={event.Title} width="104" height="136" className="img-responsive rounded-3" />
+                <div className="text-start">
+                  <strong>{event.Title}</strong>
+                  <div>{new Date(event.Date).toLocaleDateString()}</div>
                 </div>
               </div>
             ))}
-            </div>
           </div>
         )}
         </div>
