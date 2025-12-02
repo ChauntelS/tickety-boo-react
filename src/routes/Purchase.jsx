@@ -9,8 +9,9 @@ function Purchase() {
         <>
         <div className="purchase-page">
 
+
             
-            <p><Link to={`/details/${id}`}>← Back to event</Link></p>
+            <p><Link to={`/details/${id}`}className="btn btn-outline-info mt-auto text-light">← Back to event</Link></p>
           
             <div className="d-flex justify-content-center bg-dark text-white p-4 rounded-3 shadow-sm">
             

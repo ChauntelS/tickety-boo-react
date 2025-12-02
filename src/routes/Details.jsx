@@ -29,14 +29,15 @@ function Details() {
 
     return (
         <>
-            <p><Link to="/">← Back to Home</Link></p>
+            <p><Link to="/"className="btn btn-outline-info mt-auto text-light">← Back to Home</Link></p>
 
-            <div className ="haunt-details"> 
+            <div className ="haunt-details d-flex justify-content-center bg-dark text-white p-4 rounded-3 shadow-sm"> 
+                
               <div className="d-flex justify-content-center">
                 <div className= "card text-bg-dark">
                 { haunt && (
                     <>
-                    
+                
                         <img src={haunt.ImagePath} alt={haunt.Title} width= "400"/>
                         <h2>{haunt.Title}</h2>
                         <p>{haunt.Description}</p>
@@ -50,15 +51,16 @@ function Details() {
                           minute: "numeric"
                           })}
                           </p>
-                        <p><strong>Location:</strong> {haunt.Location}</p>
+                        <p><strong>Location: </strong> {haunt.Location}</p>
+                        <div className ="purchase-link d-flex justify-content-center bg-dark text-white p-4 rounded-3 shadow-sm">
+                            <p><Link to={`/purchase/${id}`}className="btn btn-outline-info mt-auto text-light">Purchase Tickets if You Dare!</Link></p>
+                        </div>
                     </>
                 )}
                 </div>
               </div>
             </div>
-            <div className ="purchase-link">
-              <p><Link to={`/purchase/${id}`}>Purchase Tickets if You Dare!</Link></p>
-              </div>
+            
         </>
     )
 }

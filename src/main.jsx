@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import Home from './routes/Home.jsx'
 import Details from './routes/Details.jsx'
 import Purchase from './routes/Purchase.jsx'
-import NavLayout from './routes/NavBar.jsx'
+import NavLayout from './ui/NavBar.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
