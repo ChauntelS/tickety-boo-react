@@ -41,17 +41,19 @@ function Home() {
 
     return (
  <>
- <div className="banner mb-4 p-4 rounded-3 bg-dark text-white shadow-sm rounded">
-    <div className= "alert-info py-3 mb-4 shadow-sm ">
-        <h4 className="fw-bold mb-2 text-center">🔥 Events Happening in the Next 10 Days</h4>
+ <div className="glass-banner mb-4 p-4 rounded-3  text-white shadow-sm rounded">
+    
+        <h4 className="fw-bold mb-2 text-center">🔥 Events Happening in the Next 10 Days 🔥</h4>
+        <div className= "alert-info py-3 mb-4 shadow-sm ">
+          
         </div>
         <div className="container text-center">
         {upcomingSoon.length === 0 && <p>No upcoming events.</p>}
         {upcomingSoon.length > 0 && (
           <div className="row align-items-start justify-content-center">
             {upcomingSoon.map(event => (
-              <div key={event.Id} className="col-auto mb-2 d-flex align-items-center justify-content-center gap-3">
-                <img src={event.ImagePath} alt={event.Title} width="104" height="136" className="img-responsive rounded-3" />
+              <div key={event.Id} className="col-auto mb-4 d-flex align-items-center justify-content-center gap-3">
+                {/* <img src={event.ImagePath} alt={event.Title} width="104" height="136" className="img-responsive rounded-3" /> */}
                 <div className="text-start">
                   <strong>{event.Title}</strong>
                   <div>{new Date(event.Date).toLocaleDateString()}</div>
