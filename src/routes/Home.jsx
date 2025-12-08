@@ -1,83 +1,143 @@
-import { useEffect,useState } from 'react'
-import HauntCard from '../ui/HauntCard.jsx'
+import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import HauntCard from '../ui/HauntCard.jsx';
 
 function getEventsWithin10Days(events) {
   const today = new Date();
-  const tenDaysFromNow = new Date()
-  tenDaysFromNow.setDate(today.getDate() + 10)
+  const tenDaysFromNow = new Date();
+  tenDaysFromNow.setDate(today.getDate() + 10);
 
   return events.filter(event => {
     const eventDate = new Date(event.Date);
-    return eventDate >= today && eventDate <= tenDaysFromNow
+    return eventDate >= today && eventDate <= tenDaysFromNow;
   });
 }
 
+
+
 function Home() {
+  const { searchTerm } = useOutletContext();
+  const [haunts, setHaunts] = useState([]);
+  const [upcomingSoon, setUpcomingSoon] = useState([]);
+  const apiUrl = import.meta.env.VITE_HAUNT_API_URL;
 
-    // Define a state variable to hold haunts
-    const [haunts, setHaunts] = useState([])
-  const [upcomingSoon, setUpcomingSoon] = useState([])
+  useEffect(() => {
+    const getHaunts = async () => {
+      const response = await fetch(apiUrl);
+      const result = await response.json();
 
-    // Get API Url from environment variables
-    const apiUrl = import.meta.env.VITE_HAUNT_API_URL
+      if (response.ok) {
+        setHaunts(result);
+        setUpcomingSoon(getEventsWithin10Days(result));
+      }
+    };
 
-    // Fetch haunts from API when component mounts
-    useEffect(() => { 
-        const getHaunts = async () => { 
-            const response = await fetch(apiUrl) 
-            const result = await response.json() 
+    getHaunts();
+  }, []);
 
-            if(response.ok) { 
-                setHaunts(result)
-
-                // filter events for the banner
-                const soon = getEventsWithin10Days(result)
-                setUpcomingSoon(soon)
-            }
-        } 
-
-        getHaunts()
-    }, [])
-
+  const filteredHaunts = haunts.filter(haunt => {
+    const term = searchTerm.toLowerCase();
     return (
- <>
- <div className="glass-banner mb-4 p-4 rounded-3  text-white shadow-sm rounded">
-    
-        <h4 className="fw-bold mb-2 text-center">🔥 Events Happening in the Next 10 Days 🔥</h4>
-        <div className= "alert-info py-3 mb-4 shadow-sm ">
-          
-        </div>
-        <div className="container text-center">
-        {upcomingSoon.length === 0 && <p>No upcoming events.</p>}
-        {upcomingSoon.length > 0 && (
-          <div className="row align-items-start justify-content-center">
-            {upcomingSoon.map(event => (
-              <div key={event.Id} className="col-auto mb-4 d-flex align-items-center justify-content-center gap-3">
-                {/* <img src={event.ImagePath} alt={event.Title} width="104" height="136" className="img-responsive rounded-3" /> */}
-                <div className="text-start">
-                  <strong>{event.Title}</strong>
-                  <div>{new Date(event.Date).toLocaleDateString()}</div>
-                </div>
-              </div>
-            ))}
+      haunt.Title.toLowerCase().includes(term) ||
+      (haunt.Location && haunt.Location.toLowerCase().includes(term)) ||
+      new Date(haunt.Date).toLocaleDateString().includes(term)
+    );
+  });
+
+  return (
+    <>
+      {/* Upgraded Banner with Animations */}
+     <section className="glass-banner relative rounded-xl shadow-lg mb-6 p-4 overflow-hidden">
+  <h2 className="text-center text-2xl md:text-3xl font-extrabold mb-4" style={{ color: 'var(--color-accent1)' }}>
+    🔥 Events Happening in the Next 10 Days 🔥
+  </h2>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    {upcomingSoon.length === 0 ? (
+      <p className="text-center text-gray-300 col-span-full">No upcoming events.</p>
+    ) : (
+      upcomingSoon.map((event, index) => (
+        <div
+          key={event.Id}
+          className="bg-[var(--color-dark)] text-white rounded-xl shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:brightness-110"
+          style={{
+            animation: `fadeInUp 0.5s ease forwards`,
+            animationDelay: `${index * 0.1}s`,
+            opacity: 0,
+          }}
+        >
+          {event.ImagePath && (
+            <img
+              src={event.ImagePath}
+              alt={event.Title}
+              className="w-full h-36 object-cover"
+            />
+          )}
+          <div className="p-3">
+            <h3 className="font-bold text-lg" style={{ color: 'var(--color-accent1)' }}>{event.Title}</h3>
+            <p style={{ color: 'var(--color-accent2)' }}>
+              {new Date(event.Date).toLocaleDateString()}
+            </p>
+            
+            {event.Location && <p style={{ color: 'var(--color-accent3)' }}>{event.Location}</p>}
+           <Link to={`/details/${event.Id}`}>
+           <button
+           className="mt-2 w-full py-2 rounded transition"
+           style={{
+            backgroundColor: 'var(--color-accent1)',
+            color: 'var(--color-dark)',
+          }}
+          >Get Details</button>
+          </Link>
           </div>
-        )}
         </div>
-      </div>
-            <h1 className="mb-4 text-white text-center ">Haunted Events</h1>
-            <div className="haunt-grid">
-            {
-                haunts.length > 0 && (
-                    haunts.map(haunt => (
-                        <div key={haunt.Id}>
-                            <HauntCard HauntId={haunt.Id} Filename={haunt.ImagePath} HauntTitle={haunt.Title} />
-                        </div>
-                    ))                    
-                )
-            }
+      ))
+    )}
+  </div>
+
+  <style>
+    {`
+      @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+    `}
+  </style>
+</section>
+
+
+      {/* All Haunted Events */}
+      <h1 className="mb-4 text-white text-center">Haunted Events</h1>
+      <div className="haunt-grid">
+        {filteredHaunts.length > 0 ? (
+          filteredHaunts.map(haunt => (
+            <div key={haunt.Id}>
+              <HauntCard
+                HauntId={haunt.Id}
+                Filename={haunt.ImagePath}
+                HauntTitle={haunt.Title}
+              />
             </div>
-        </>
-    )
+          ))
+        ) : (
+          <p className="text-white text-center mt-8">
+            No events found matching your search.
+          </p>
+        )}
+      </div>
+
+      {/* Inline animation keyframes */}
+      <style>
+        {`
+          @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
+    </>
+  );
 }
 
-export default Home
+export default Home;
