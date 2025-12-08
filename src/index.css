@@ -4,6 +4,53 @@
   column-gap: 1.5em;
 }
 
+/* Banner event image */
+.banner-event-image {
+   width: 100%;       /* fill card width */
+  height: 180px;     /* fixed height */
+  object-fit: cover; /* crop image without stretching */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+
+}
+
+/* General page headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  color: var(--color-accent1);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-bottom: 0.5rem;
+}
+
+/* Banner heading specifically */
+.glass-banner h2 {
+  font-weight: 800;
+  font-size: 1.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Haunted Events heading */
+h1.text-center {
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+/* Event card titles */
+.haunt-title-overlay h5,
+.glass-banner h3 {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-transform: capitalize;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+
 .haunt-grid-item {
   margin-bottom: 1rem;
   break-inside: avoid;

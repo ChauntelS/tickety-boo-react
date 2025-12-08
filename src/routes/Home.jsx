@@ -14,27 +14,45 @@ function getEventsWithin10Days(events) {
   });
 }
 
-
-
 function Home() {
   const { searchTerm } = useOutletContext();
   const [haunts, setHaunts] = useState([]);
   const [upcomingSoon, setUpcomingSoon] = useState([]);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const apiUrl = import.meta.env.VITE_HAUNT_API_URL;
 
   useEffect(() => {
     const getHaunts = async () => {
       const response = await fetch(apiUrl);
       const result = await response.json();
-
       if (response.ok) {
         setHaunts(result);
         setUpcomingSoon(getEventsWithin10Days(result));
       }
     };
-
     getHaunts();
   }, []);
+
+  // Auto-slide every 5 seconds
+  useEffect(() => {
+    if (upcomingSoon.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentEventIndex(prev => (prev + 1) % upcomingSoon.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [upcomingSoon]);
+
+  const handlePrev = () => {
+    setCurrentEventIndex(prev =>
+      prev === 0 ? upcomingSoon.length - 1 : prev - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentEventIndex(prev =>
+      prev === upcomingSoon.length - 1 ? 0 : prev + 1
+    );
+  };
 
   const filteredHaunts = haunts.filter(haunt => {
     const term = searchTerm.toLowerCase();
@@ -47,65 +65,83 @@ function Home() {
 
   return (
     <>
-      {/* Upgraded Banner with Animations */}
-     <section className="glass-banner relative rounded-xl shadow-lg mb-6 p-4 overflow-hidden">
-  <h2 className="text-center text-2xl md:text-3xl font-extrabold mb-4" style={{ color: 'var(--color-accent1)' }}>
-    🔥 Events Happening in the Next 10 Days 🔥
-  </h2>
+      {/* Centered Single-Event Banner */}
+      <section className="glass-banner relative rounded-xl shadow-lg mb-6 p-4 flex flex-col items-center justify-center">
+        <h2 className="text-center text-xl md:text-2xl font-bold mb-2" style={{ color: 'var(--color-accent1)' }}>
+          🔥 Events Happening in the Next 10 Days 🔥
+        </h2>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    {upcomingSoon.length === 0 ? (
-      <p className="text-center text-gray-300 col-span-full">No upcoming events.</p>
-    ) : (
-      upcomingSoon.map((event, index) => (
-        <div
-          key={event.Id}
-          className="bg-[var(--color-dark)] text-white rounded-xl shadow-lg overflow-hidden transform transition duration-500 hover:scale-105 hover:brightness-110"
-          style={{
-            animation: `fadeInUp 0.5s ease forwards`,
-            animationDelay: `${index * 0.1}s`,
-            opacity: 0,
-          }}
-        >
-          {event.ImagePath && (
-            <img
-              src={event.ImagePath}
-              alt={event.Title}
-              className="w-full h-36 object-cover"
-            />
-          )}
-          <div className="p-3">
-            <h3 className="font-bold text-lg" style={{ color: 'var(--color-accent1)' }}>{event.Title}</h3>
-            <p style={{ color: 'var(--color-accent2)' }}>
-              {new Date(event.Date).toLocaleDateString()}
-            </p>
-            
-            {event.Location && <p style={{ color: 'var(--color-accent3)' }}>{event.Location}</p>}
-           <Link to={`/details/${event.Id}`}>
-           <button
-           className="mt-2 w-full py-2 rounded transition"
-           style={{
-            backgroundColor: 'var(--color-accent1)',
-            color: 'var(--color-dark)',
-          }}
-          >Get Details</button>
-          </Link>
+        {upcomingSoon.length === 0 ? (
+          <p className="text-center text-gray-300">No upcoming events.</p>
+        ) : (
+          <div className="relative flex items-center justify-center w-full max-w-md">
+            {/* Prev Button */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-2 z-10 p-3 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--color-accent1)',
+                color: 'var(--color-dark)',
+                fontSize: '1.5rem',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              }}
+              aria-label="Previous Event"
+            >
+              ◀
+            </button>
+
+            {/* Event Card */}
+            <div className="bg-[var(--color-dark)] text-white rounded-xl shadow-lg overflow-hidden w-full flex-shrink-0 flex flex-col items-center justify-center">
+              {upcomingSoon[currentEventIndex].ImagePath && (
+                <img
+                  src={upcomingSoon[currentEventIndex].ImagePath}
+                  alt={upcomingSoon[currentEventIndex].Title}
+                  className="banner-event-image"
+                />
+              )}
+              <div className="p-3 text-center">
+                <h3 className="font-bold text-lg" style={{ color: 'var(--color-accent1)' }}>
+                  {upcomingSoon[currentEventIndex].Title}
+                </h3>
+                <p style={{ color: 'var(--color-accent2)' }}>
+                  {new Date(upcomingSoon[currentEventIndex].Date).toLocaleDateString()}
+                </p>
+                {upcomingSoon[currentEventIndex].Location && (
+                  <p style={{ color: 'var(--color-accent3)' }}>
+                    {upcomingSoon[currentEventIndex].Location}
+                  </p>
+                )}
+                <Link to={`/details/${upcomingSoon[currentEventIndex].Id}`}>
+                  <button
+                    className="mt-2 py-2 px-4 rounded transition"
+                    style={{
+                      backgroundColor: 'var(--color-accent1)',
+                      color: 'var(--color-dark)',
+                    }}
+                  >
+                    Get Details
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={handleNext}
+              className="absolute right-2 z-10 p-3 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--color-accent1)',
+                color: 'var(--color-dark)',
+                fontSize: '1.5rem',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              }}
+              aria-label="Next Event"
+            >
+              ▶
+            </button>
           </div>
-        </div>
-      ))
-    )}
-  </div>
-
-  <style>
-    {`
-      @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(20px); }
-        100% { opacity: 1; transform: translateY(0); }
-      }
-    `}
-  </style>
-</section>
-
+        )}
+      </section>
 
       {/* All Haunted Events */}
       <h1 className="mb-4 text-white text-center">Haunted Events</h1>
@@ -126,16 +162,6 @@ function Home() {
           </p>
         )}
       </div>
-
-      {/* Inline animation keyframes */}
-      <style>
-        {`
-          @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
     </>
   );
 }

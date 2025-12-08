@@ -1,14 +1,35 @@
-import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 
+
+
+// Luhn Algorithm for card validation
+function isValidCardNumber(value) {
+    const digits = value.replace(/\D/g, '');
+    let sum = 0;
+    let shouldDouble = false;
+
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits[i], 10);
+        if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        shouldDouble = !shouldDouble;
+    }
+
+    return sum % 10 === 0;
+}
+
+
+
 function Purchase() {
     const { id } = useParams();
-    const { register, handleSubmit, formState: { errors }, watch, getValues } = useForm();
+    const { register, handleSubmit, formState: { errors }, watch } = useForm();
     const [progress, setProgress] = useState(0);
 
-    // All form fields to track for progress
     const fields = [
         "Quantity", "CustomerEmail", "CardType",
         "CardNum", "CardExpire", "CardSecurity",
@@ -16,7 +37,6 @@ function Purchase() {
         "CustomerCountry", "CustomerCity"
     ];
 
-    // Update progress bar dynamically
     const handleProgress = (data) => {
         let filled = 0;
         fields.forEach(field => {
@@ -26,23 +46,29 @@ function Purchase() {
     };
 
     const watchedFields = watch();
-    useEffect(() => {
-        handleProgress(watchedFields);
-    }, [watchedFields]);
+    useEffect(() => handleProgress(watchedFields), [watchedFields]);
 
     const onSubmit = async (data) => {
-        data.HauntId = id; // add the event ID
+        data.HauntId = id;
         console.log("Submitting:", data);
-
         const res = await fetch("http://localhost:3000/api/haunts/purchase", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
-
         const result = await res.json();
         console.log(result);
     };
+
+    // Helper function to show ✅ or ❌
+    const renderIcon = (fieldName) => {
+        const value = watchedFields[fieldName];
+        if (!value) return null;
+        if (errors[fieldName]) return <span className="text-danger ms-2">❌</span>;
+        return <span className="text-success ms-2">✅</span>;
+    };
+
+    
 
     return (
         <div className="purchase-page text-white container my-4">
@@ -51,10 +77,7 @@ function Purchase() {
             </h1>
 
             <p>
-                <Link 
-                    to={`/details/${id}`}
-                    className="btn btn-outline-se mt-auto text-light"
-                >
+                <Link to={`/details/${id}`} className="btn btn-outline-se mt-auto text-light">
                     ← Back to Haunt
                 </Link>
             </p>
@@ -75,22 +98,22 @@ function Purchase() {
 
             <div className="d-flex justify-content-center text-white p-4 rounded-3 shadow-sm">
                 <form onSubmit={handleSubmit(onSubmit)} className="purchase-form w-50">
+
                     {/* Purchase Info */}
                     <div className="card p-3 mb-3 bg-dark text-white rounded-3 shadow-sm">
                         <legend style={{ color: 'var(--color-accent1)' }}>Purchase Information</legend>
-                        
+
                         <div className="mb-3">
                             <label htmlFor="Quantity" className="form-label">Ticket Quantity</label>
                             <select
                                 id="Quantity"
                                 className="form-select bg-dark text-white"
-                                {...register("Quantity", { required: true })}
+                                {...register("Quantity", { required: "Quantity is required" })}
                             >
-                                {[1,2,3,4,5,6].map(num =>
-                                    <option key={num} value={num}>{num}</option>
-                                )}
+                                {[1,2,3,4,5,6].map(num => <option key={num} value={num}>{num}</option>)}
                             </select>
-                            {errors.Quantity && <p className="text-danger">Required</p>}
+                            {errors.Quantity && <p className="text-danger">{errors.Quantity.message}</p>}
+                            {renderIcon("Quantity")}
                         </div>
 
                         <div className="mb-3">
@@ -98,9 +121,16 @@ function Purchase() {
                             <input
                                 type="email"
                                 className="form-control bg-dark text-white"
-                                {...register("CustomerEmail", { required: true })}
+                                {...register("CustomerEmail", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/i,
+                                        message: "Enter a valid email"
+                                    }
+                                })}
                             />
-                            {errors.CustomerEmail && <p className="text-danger">Valid email required</p>}
+                            {errors.CustomerEmail && <p className="text-danger">{errors.CustomerEmail.message}</p>}
+                            {renderIcon("CustomerEmail")}
                         </div>
                     </div>
 
@@ -112,13 +142,16 @@ function Purchase() {
                             <label className="form-label">Payment Type</label>
                             <select
                                 className="form-select bg-dark text-white"
-                                {...register("CardType", { required: true })}
+                                {...register("CardType", { required: "Card type is required" })}
                             >
+                                <option value="">Select...</option>
                                 <option>Master Card</option>
                                 <option>Visa</option>
                                 <option>American Express</option>
                                 <option>Discover</option>
                             </select>
+                            {errors.CardType && <p className="text-danger">{errors.CardType.message}</p>}
+                            {renderIcon("CardType")}
                         </div>
 
                         <div className="mb-3">
@@ -126,18 +159,34 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CardNum", { required: true, minLength: 12, maxLength: 16 })}
+                                {...register("CardNum", {
+                                    required: "Card number is required",
+                                    minLength: { value: 12, message: "Minimum 12 digits" },
+                                    maxLength: { value: 16, message: "Maximum 16 digits" },
+                                    pattern: { value: /^[0-9]+$/, message: "Numbers only" },
+                                    validate: value => isValidCardNumber(value) || "Invalid card number"
+                                })}
                             />
+                            {errors.CardNum && <p className="text-danger">{errors.CardNum.message}</p>}
+                            {renderIcon("CardNum")}
                         </div>
 
                         <div className="mb-3">
-                            <label className="form-label">Card Expiry</label>
+                            <label className="form-label">Card Expiry (MM/YY)</label>
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
                                 placeholder="MM/YY"
-                                {...register("CardExpire", { required: true })}
+                                {...register("CardExpire", {
+                                    required: "Expiry date is required",
+                                    pattern: {
+                                        value: /^(0[1-9]|1[0-2])\/?([0-9]{2})$/,
+                                        message: "Invalid format MM/YY"
+                                    }
+                                })}
                             />
+                            {errors.CardExpire && <p className="text-danger">{errors.CardExpire.message}</p>}
+                            {renderIcon("CardExpire")}
                         </div>
 
                         <div className="mb-3">
@@ -145,8 +194,15 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CardSecurity", { required: true, minLength: 3, maxLength: 4 })}
+                                {...register("CardSecurity", {
+                                    required: "CVC is required",
+                                    minLength: { value: 3, message: "Minimum 3 digits" },
+                                    maxLength: { value: 4, message: "Maximum 4 digits" },
+                                    pattern: { value: /^[0-9]+$/, message: "Numbers only" }
+                                })}
                             />
+                            {errors.CardSecurity && <p className="text-danger">{errors.CardSecurity.message}</p>}
+                            {renderIcon("CardSecurity")}
                         </div>
                     </div>
 
@@ -159,8 +215,10 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CustomerName", { required: true })}
+                                {...register("CustomerName", { required: "Name is required" })}
                             />
+                            {errors.CustomerName && <p className="text-danger">{errors.CustomerName.message}</p>}
+                            {renderIcon("CustomerName")}
                         </div>
 
                         <div className="mb-3">
@@ -168,8 +226,10 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CustomerBillAdd", { required: true })}
+                                {...register("CustomerBillAdd", { required: "Street address is required" })}
                             />
+                            {errors.CustomerBillAdd && <p className="text-danger">{errors.CustomerBillAdd.message}</p>}
+                            {renderIcon("CustomerBillAdd")}
                         </div>
 
                         <div className="mb-3">
@@ -177,8 +237,10 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CustomerCountry", { required: true })}
+                                {...register("CustomerCountry", { required: "Country is required" })}
                             />
+                            {errors.CustomerCountry && <p className="text-danger">{errors.CustomerCountry.message}</p>}
+                            {renderIcon("CustomerCountry")}
                         </div>
 
                         <div className="mb-3">
@@ -186,8 +248,10 @@ function Purchase() {
                             <input
                                 type="text"
                                 className="form-control bg-dark text-white"
-                                {...register("CustomerCity", { required: true })}
+                                {...register("CustomerCity", { required: "City is required" })}
                             />
+                            {errors.CustomerCity && <p className="text-danger">{errors.CustomerCity.message}</p>}
+                            {renderIcon("CustomerCity")}
                         </div>
                     </div>
 
